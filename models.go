@@ -2,7 +2,7 @@ package main
 
 import (
 	"gopkg.in/resty.v1"
-	"fmt"
+	//"fmt"
 	"encoding/json"
 )
 
@@ -32,6 +32,10 @@ type Token struct {
 	Expires_in uint64
 	Token_type string
 	Scope string
+}
+
+type Nik struct {
+	NIK string
 }
 
 func RequestToken() (auth string, success bool) {
@@ -64,12 +68,12 @@ func InitToken() (auth string, success bool) {
 	var auth_token = new (Token)
 	err := Load(FILE, auth_token)
 	if err==nil {
-		fmt.Println("Take from file")
+		//fmt.Println("Take from file")
 		auth = `Bearer ` + auth_token.Access_token
 		success = true
 		return
 	} else {
-		fmt.Println("Take from new request")
+		//fmt.Println("Take from new request")
 		auth,success = RequestToken()
 		return
 	}
