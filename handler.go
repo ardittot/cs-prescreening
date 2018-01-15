@@ -15,7 +15,7 @@ func RequestSICD (c *gin.Context) {
 	if err := c.ShouldBindJSON(&sicd); err == nil {
 		url = "http://api.briconnect.bri.co.id/sid/sicd/" + sicd.Name + "/" + sicd.Birth_date + "/" + sicd.Personal_number + "/" + sicd.Branch_code
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 	}
 
 	READ_WS_SICD: resp, err := resty.R().
@@ -27,19 +27,19 @@ func RequestSICD (c *gin.Context) {
 		} else {
 			var resp_body map[string]interface{}
 			json.Unmarshal(resp.Body(), &resp_body)
-			// if resp_body.(struct{error string}).error == "invalid_token" {
-			if resp_body["error"] == "invalid_token" {
-				fmt.Println("Token "+ auth +" is not valid") // Auth token is not valid or expired 
+			fmt.Printf("erro: %v\n", resp_body["error"])
+			if resp_body["error"] == "invalid_token" || resp_body["error"] == "missing_token" {
+				//fmt.Println("Token "+ auth +" is not valid") // Auth token is not valid or expired 
 				auth,_ = RequestToken()
 				goto READ_WS_SICD
-			} else {
-				fmt.Printf("Error: %v\n",resp_body["message"])
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {	//Other error
+				//fmt.Printf("Error: %v\n",resp_body["message"])
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid url or JSON format"})
 			}
 		}
 	} else {
 		// Request Error
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to connect to prescreening service"})
 	}
 }
 
@@ -50,7 +50,7 @@ func RequestDHN (c *gin.Context) {
 	if err := c.ShouldBindJSON(&dh); err == nil {
 		url = "http://api.briconnect.bri.co.id/sid/dhn/"+ dh.Name + "/" + dh.Birth_date
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 	}
 
 	READ_WS_DHN: resp, err := resty.R().
@@ -62,18 +62,17 @@ func RequestDHN (c *gin.Context) {
 		} else {
 			var resp_body map[string]interface{}
 			json.Unmarshal(resp.Body(), &resp_body)
-			// if resp_body.(struct{error string}).error == "invalid_token" {
-			if resp_body["error"] == "invalid_token" {
-				fmt.Println("Token "+ auth +" is not valid") // Auth token is not valid or expired 
+			if resp_body["error"] == "invalid_token" || resp_body["error"] == "missing_token" {
+				//fmt.Println("Token "+ auth +" is not valid") // Auth token is not valid or expired 
 				auth,_ = RequestToken()
 				goto READ_WS_DHN
-			} else {
-				fmt.Printf("Error: %v\n",resp_body["message"])
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {	//Other error
+				//fmt.Printf("Error: %v\n",resp_body["message"])
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid url or JSON format"})
 			}
 		}
 	} else {
 		// Request Error
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to connect to prescreening service"})
 	}
 }
